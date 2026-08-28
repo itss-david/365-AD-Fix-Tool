@@ -74,15 +74,21 @@ function Invoke-ADFixCheck {
     Write-ADFixLog "Found $($issues.Count) AD-side issues." -Level $(if ($issues.Count -gt 0) { 'Warning' } else { 'Success' })
 
     if (-not $SkipCloudCheck) {
-        Write-ADFixLog 'Connecting to Microsoft Graph...'
-        Connect-ADFix365Session -TenantId $TenantId
+        try {
+            Write-ADFixLog 'Connecting to Microsoft Graph...'
+            Connect-ADFix365Session -TenantId $TenantId
 
-        Write-ADFixLog 'Retrieving synced Microsoft 365 users...'
-        $cloudUsers = Get-ADFix365User
-        Write-ADFixLog "Retrieved $($cloudUsers.Count) synced cloud users." -Level Success
+            Write-ADFixLog 'Retrieving synced Microsoft 365 users...'
+            $cloudUsers = Get-ADFix365User
+            Write-ADFixLog "Retrieved $($cloudUsers.Count) synced cloud users." -Level Success
 
-        Write-ADFixLog 'Comparing AD users against Microsoft 365...'
-        Compare-ADFix365Identity -ADUser $adUsers -CloudUser $cloudUsers | ForEach-Object { $issues.Add($_) }
+            Write-ADFixLog 'Comparing AD users against Microsoft 365...'
+            Compare-ADFix365Identity -ADUser $adUsers -CloudUser $cloudUsers | ForEach-Object { $issues.Add($_) }
+        }
+        catch {
+            Write-ADFixLog "Microsoft 365 comparison failed, continuing with AD-only results: $_" -Level Warning
+            Write-ADFixLog 'Re-run with -SkipCloudCheck to suppress this step, or install/sign in to Microsoft Graph and try again.' -Level Warning
+        }
     }
     else {
         Write-ADFixLog 'Skipping Microsoft 365 comparison (-SkipCloudCheck).' -Level Warning
