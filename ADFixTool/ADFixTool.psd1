@@ -1,6 +1,6 @@
 @{
     RootModule        = 'ADFixTool.psm1'
-    ModuleVersion     = '0.1.0'
+    ModuleVersion     = '0.1.2'
     GUID              = '3f0c5b0a-6e0a-4b6b-9b0c-9f8f1a6e6b1b'
     Author            = 'itss-david'
     CompanyName       = 'ITSS'
